@@ -1,34 +1,49 @@
+#importing all the libraries and modules
 import pygame, sys
 from pygame.locals import *
 import random
+#initialize all the pygame modules
 pygame.init()
+#setting the fps 
 clock = pygame.time.Clock()
-fps = 60
-ground_scroll = 0
-scroll_speed = 4
+fps = 80
+#screen size
 screen_width = 864
 screen_height = 936
+#setting screen size
+screen = pygame.display.set_mode((screen_width, screen_height))
+pygame.display.set_caption('Flappy Soar')
+#scroll
+ground_scroll = 0
+scroll_speed = 4
+#setting intial value of flying and game_over
 flying = False
 game_over = False
+#pipe values
 pipe_gap = 150
 pipe_frequency = 1500
 last_pipe = pygame.time.get_ticks() - pipe_frequency
 score = 0 
 pass_pipe = False
+#powerups
 shroom_activated = False
 speedboost_activated = False
 double_activated = False
 shroom_activation_time = 0
 shroom_duration = 5000
+double_activion_time = 0 
+double_duration = 5000
+speedboost_activion_time = 0 
+speedboost_duration = 5000
+#intialize main menu
 main_menu = True
 #define font 
 font = pygame.font.SysFont('Verdana', 60)
 #define color
 white = (255, 255, 255)
-screen = pygame.display.set_mode((screen_width, screen_height))
-pygame.display.set_caption('Flappy Bird')
 #load images
 bg = pygame.image.load('bg.png')
+#adjusting background in main menu  
 if main_menu == True:
     bg = pygame.transform.scale(bg, (864, 936))
 else:
@@ -45,9 +60,6 @@ logo_img = pygame.transform.scale(logo_img,(500,500))
 def draw_text(text,font,text_col,x,y):
     img = font.render(text,True,text_col)
     screen.blit(img,(x,y))
-def draw_finalscore(text,font,text_col,x,y):
-    img = font.render(text,True,text_col)
-    screen.blit(img,(x,y))
 def reset_game():
     pipe_group.empty()
     shroom_group.empty()
@@ -58,7 +70,13 @@ def reset_game():
     score = 0 
     shroom_activated = False
     shroom_activation_time = 0
-    return score, shroom_activated, shroom_activation_time
+    speedboost_activated = False
+    speedboost_activation_time = 0
+    double_activated = False
+    double_activation_time = 0
+
+    return score, shroom_activated, shroom_activation_time, speedboost_activated, speedboost_activation_time, double_activated, double_activation_time
+#powerups
 class Speed(pygame.sprite.Sprite):
     def __init__(self,x,y):
         pygame.sprite.Sprite.__init__(self)
@@ -250,10 +268,10 @@ while run:
             shroom_activation_time = pygame.time.get_ticks()
         if pygame.sprite.groupcollide(bird_group, double_group, False, True):
             double_activated = True
-            shroom_activation_time = pygame.time.get_ticks()
+            double_activation_time = pygame.time.get_ticks()
         if pygame.sprite.groupcollide(bird_group, speed_group, False, True):
             speedboost_activated = True
-            shroom_activation_time = pygame.time.get_ticks()
+            speedboost_activation_time = pygame.time.get_ticks()
         
         #checking shroom activation 
         if shroom_activated:
@@ -263,11 +281,11 @@ while run:
         #checking double activation
         if double_activated:
             current_time = pygame.time.get_ticks()
-            if current_time - shroom_activation_time >= shroom_duration:
+            if current_time - double_activation_time >= double_duration:
                 double_activated = False
         if speedboost_activated:
             current_time = pygame.time.get_ticks()
-            if current_time - shroom_activation_time >= shroom_duration:
+            if current_time - speedboost_activation_time >= speedboost_duration:
                 speedboost_activated = False
 
         # Check if bird has hit the ground
@@ -280,6 +298,10 @@ while run:
             time_now = pygame.time.get_ticks()
 
             # Generate new pipes
+            if speedboost_activated:
+                pipe_frequency = 1000
+            else:
+                pipe_frequency = 1500
             if time_now - last_pipe > pipe_frequency:
                 pipe_height = random.randint(-100, 100)
                 random_powerup = random.randint(1, 10)
@@ -317,10 +339,10 @@ while run:
 
         #check for game over and reset 
         if game_over == True:
-            draw_finalscore(f'Final Score:{str(score)}',font, white, screen_width // 2 - 175, screen_height // 2 - 100)
+            draw_text(f'Final Score:{str(score)}',font, white, screen_width // 2 - 175, screen_height // 2 - 100)
             if button.draw() == True:
                 game_over = False
-                score, shroom_activated,shroom_activation_time = reset_game()
+                score, shroom_activated,shroom_activation_time, speedboost_activated, speedboost_activation_time, double_activated, double_activation_time  = reset_game()
             if exitbtn2.draw():
                 run = False
 
