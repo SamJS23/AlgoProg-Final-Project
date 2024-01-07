@@ -38,7 +38,8 @@ speedboost_duration = 5000
 #intialize main menu
 main_menu = True
 #define font 
-font = pygame.font.SysFont('Verdana', 60)
+font1 = pygame.font.SysFont('Verdana', 60)
+font2 = pygame.font.SysFont('Verdana', 20)
 #define color
 white = (255, 255, 255)
 #load images
@@ -57,9 +58,13 @@ exit_img1 = pygame.transform.scale(exit_img,(120,63))
 exit_img2 = pygame.transform.scale(exit_img,(80,42))
 logo_img = pygame.image.load('logo.png')
 logo_img = pygame.transform.scale(logo_img,(500,500))
-def draw_text(text,font,text_col,x,y):
-    img = font.render(text,True,text_col)
+def draw_score(text,font1,text_col,x,y):
+    img = font1.render(text,True,text_col)
     screen.blit(img,(x,y))
+def draw_duration(text,font2,text_col,x,y):
+    img = font2.render(text,True,text_col)
+    screen.blit(img,(x,y))
+
 def reset_game():
     pipe_group.empty()
     shroom_group.empty()
@@ -163,9 +168,9 @@ class Bird(pygame.sprite.Sprite):
             self.image = pygame.transform.rotate(self.images[self.index], self.vel * -2)
         else:
             self.image = pygame.transform.rotate(self.images[self.index], -90)
-        
+        #make bird smaller when shroom active
         if shroom_activated:
-            current_center = self.rect.center  # Store the current center position
+            current_center = self.rect.center  
             self.image = pygame.transform.scale(self.images[self.index], (30, 25))
             self.rect = self.image.get_rect()
             self.rect.center = current_center 
@@ -258,7 +263,7 @@ while run:
                     elif double_activated == True:
                         score += 2 
                     pass_pipe = False
-        draw_text(str(score),font,white,int(screen_width/2),100)
+        draw_score(str(score),font1,white,int(screen_width/2),100)
         #look for collision
         if pygame.sprite.groupcollide(bird_group, pipe_group, False, False) or flappy.rect.top < 0:
             game_over = True
@@ -276,16 +281,22 @@ while run:
         #checking shroom activation 
         if shroom_activated:
             current_time = pygame.time.get_ticks()
-            if current_time - shroom_activation_time >= shroom_duration:
+            remaining_duration = max(0, shroom_duration - (current_time - shroom_activation_time))
+            draw_duration(f'Remaining mini shroom duration: {remaining_duration // 1000} seconds', font2, white, screen_width // 2 - 200, screen_height // 2 - 200)
+            if current_time - shroom_activation_time >= shroom_duration or game_over == True:
                 shroom_activated = False
         #checking double activation
         if double_activated:
             current_time = pygame.time.get_ticks()
-            if current_time - double_activation_time >= double_duration:
+            remaining_duration = max(0, double_duration - (current_time - double_activation_time))
+            draw_duration(f'Remaining double duration: {remaining_duration // 1000} seconds', font2, white, screen_width // 2 - 200, screen_height // 2 - 170)
+            if current_time - double_activation_time >= double_duration or game_over == True:
                 double_activated = False
         if speedboost_activated:
             current_time = pygame.time.get_ticks()
-            if current_time - speedboost_activation_time >= speedboost_duration:
+            remaining_duration = max(0, speedboost_duration - (current_time - speedboost_activation_time))
+            draw_duration(f'Remaining speedboost duration: {remaining_duration // 1000} seconds', font2, white, screen_width // 2 - 200, screen_height // 2 - 140)
+            if current_time - speedboost_activation_time >= speedboost_duration or game_over == True:
                 speedboost_activated = False
 
         # Check if bird has hit the ground
@@ -336,10 +347,9 @@ while run:
             shroom_group.update()
             double_group.update()
             speed_group.update()
-
         #check for game over and reset 
         if game_over == True:
-            draw_text(f'Final Score:{str(score)}',font, white, screen_width // 2 - 175, screen_height // 2 - 100)
+            draw_score(f'Final Score:{str(score)}',font1, white, screen_width // 2 - 175, screen_height // 2 - 100)
             if button.draw() == True:
                 game_over = False
                 score, shroom_activated,shroom_activation_time, speedboost_activated, speedboost_activation_time, double_activated, double_activation_time  = reset_game()
