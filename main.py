@@ -210,7 +210,8 @@ class Button():
         screen.blit(self.image, (self.rect.x, self.rect.y))
 
         return action
-    
+
+#creating sprite groups 
 shroom_group = pygame.sprite.Group()
 bird_group = pygame.sprite.Group()
 pipe_group = pygame.sprite.Group()
@@ -220,7 +221,7 @@ speed_group = pygame.sprite.Group()
 flappy = Bird(100, int(screen_height/2))
 
 bird_group.add(flappy)
-#create restart button instance 
+#create button instance 
 button = Button(screen_width // 2 - 100, screen_height // 2, button_img)
 startbtn = Button(screen_width // 2 - 50, screen_height // 2, start_img)
 exitbtn1 = Button(screen_width // 2 - 50, screen_height // 2 + 100, exit_img1)
@@ -231,6 +232,7 @@ while run:
     
     #draw background
     screen.blit(bg,(0,0))
+    #main menu
     if main_menu == True:
         screen.blit(logo_img, (200,125))
         if startbtn.draw():
@@ -238,6 +240,7 @@ while run:
             flying = False
         if exitbtn1.draw():
             run = False
+    #main game page
     else:
         bird_group.draw(screen)
         bird_group.update()
@@ -281,20 +284,20 @@ while run:
         #checking shroom activation 
         if shroom_activated:
             current_time = pygame.time.get_ticks()
-            remaining_duration = max(0, shroom_duration - (current_time - shroom_activation_time))
+            remaining_duration = max(0, shroom_duration + 1000 - (current_time - shroom_activation_time))
             draw_duration(f'Remaining mini shroom duration: {remaining_duration // 1000} seconds', font2, white, screen_width // 2 - 200, screen_height // 2 - 200)
             if current_time - shroom_activation_time >= shroom_duration or game_over == True:
                 shroom_activated = False
         #checking double activation
         if double_activated:
             current_time = pygame.time.get_ticks()
-            remaining_duration = max(0, double_duration - (current_time - double_activation_time))
+            remaining_duration = max(0, double_duration + 1000 - (current_time - double_activation_time))
             draw_duration(f'Remaining double duration: {remaining_duration // 1000} seconds', font2, white, screen_width // 2 - 200, screen_height // 2 - 170)
             if current_time - double_activation_time >= double_duration or game_over == True:
                 double_activated = False
         if speedboost_activated:
             current_time = pygame.time.get_ticks()
-            remaining_duration = max(0, speedboost_duration - (current_time - speedboost_activation_time))
+            remaining_duration = max(0, speedboost_duration + 1000 - (current_time - speedboost_activation_time))
             draw_duration(f'Remaining speedboost duration: {remaining_duration // 1000} seconds', font2, white, screen_width // 2 - 200, screen_height // 2 - 140)
             if current_time - speedboost_activation_time >= speedboost_duration or game_over == True:
                 speedboost_activated = False
@@ -304,7 +307,7 @@ while run:
             game_over = True
             flying = False
 
-        # Draw and scroll the ground
+        
         if not game_over and flying:
             time_now = pygame.time.get_ticks()
 
@@ -336,6 +339,7 @@ while run:
                     shroom = Shroom(screen_width, int(screen_height/2) + pipe_height)
                     shroom.rect.centery = (btm_pipe.rect.centery + top_pipe.rect.centery) / 2
                     shroom_group.add(shroom)
+            # Draw and scroll the ground
             if speedboost_activated:
                 ground_scroll -= scroll_speed + 1
             else:
